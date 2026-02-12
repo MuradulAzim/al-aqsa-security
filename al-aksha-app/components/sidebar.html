@@ -1,0 +1,145 @@
+<!-- Sidebar Component -->
+<aside id="sidebar" class="sidebar fixed left-0 top-0 h-full w-64 bg-primary text-white pt-16 z-30 transform -translate-x-full md:translate-x-0">
+  <!-- Sidebar content -->
+  <div class="h-full flex flex-col">
+    <!-- Navigation menu -->
+    <nav class="flex-1 px-4 py-6 overflow-y-auto">
+      <ul class="space-y-2" id="sidebar-menu">
+        <!-- Menu items will be populated by JS based on role -->
+      </ul>
+    </nav>
+    
+    <!-- Sidebar footer -->
+    <div class="p-4 border-t border-primary-light">
+      <p class="text-xs text-gray-400 text-center">
+        v<span id="sidebar-version">1.0.0</span>
+      </p>
+    </div>
+  </div>
+</aside>
+
+<!-- Sidebar overlay for mobile -->
+<div 
+  id="sidebar-overlay" 
+  class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden md:hidden"
+  onclick="toggleSidebar()"
+></div>
+
+<script>
+  // Menu configuration with roles
+  const MENU_ITEMS = [
+    { 
+      id: 'dashboard', 
+      label: 'Dashboard', 
+      icon: '📊', 
+      href: 'dashboard.html',
+      roles: ['admin', 'supervisor', 'employee']
+    },
+    { 
+      id: 'employees', 
+      label: 'Employees', 
+      icon: '👥', 
+      href: 'employees.html',
+      roles: ['admin', 'supervisor']
+    },
+    { 
+      id: 'clients', 
+      label: 'Clients', 
+      icon: '🏢', 
+      href: 'clients.html',
+      roles: ['admin']
+    },
+    { 
+      id: 'guard-duty', 
+      label: 'Guard Duty', 
+      icon: '🛡️', 
+      href: 'guard-duty.html',
+      roles: ['admin', 'supervisor']
+    },
+    { 
+      id: 'vessel-orders', 
+      label: 'Vessel Orders', 
+      icon: '🚢', 
+      href: 'vessel-orders.html',
+      roles: ['admin', 'supervisor']
+    },
+    { 
+      id: 'day-labor', 
+      label: 'Day Labor', 
+      icon: '👷', 
+      href: 'day-labor.html',
+      roles: ['admin', 'supervisor']
+    },
+    { 
+      id: 'advances', 
+      label: 'Advances', 
+      icon: '💰', 
+      href: 'advances.html',
+      roles: ['admin']
+    },
+    { 
+      id: 'salary', 
+      label: 'Salary', 
+      icon: '💵', 
+      href: 'salary.html',
+      roles: ['admin']
+    },
+    { 
+      id: 'invoices', 
+      label: 'Invoices', 
+      icon: '📄', 
+      href: 'invoices.html',
+      roles: ['admin']
+    }
+  ];
+
+  // Initialize sidebar
+  (function() {
+    const menu = document.getElementById('sidebar-menu');
+    const currentPage = window.location.pathname.split('/').pop().replace('.html', '') || 'dashboard';
+    const userRole = getRole() || 'employee';
+    const version = document.getElementById('sidebar-version');
+    
+    if (version && typeof CONFIG !== 'undefined') {
+      version.textContent = CONFIG.APP_VERSION;
+    }
+    
+    // Filter menu items based on role and render
+    const allowedItems = MENU_ITEMS.filter(item => item.roles.includes(userRole));
+    
+    menu.innerHTML = allowedItems.map(item => {
+      const isActive = currentPage === item.id || 
+                       (currentPage === 'index' && item.id === 'dashboard');
+      
+      return `
+        <li>
+          <a 
+            href="${item.href}" 
+            class="nav-link flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive ? 'active bg-primary-light' : 'hover:bg-primary-light'}"
+          >
+            <span class="text-xl">${item.icon}</span>
+            <span>${item.label}</span>
+          </a>
+        </li>
+      `;
+    }).join('');
+  })();
+
+  // Toggle sidebar function
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    
+    sidebar.classList.toggle('-translate-x-full');
+    overlay.classList.toggle('hidden');
+  }
+  
+  // Close sidebar when clicking a link on mobile
+  document.querySelectorAll('#sidebar-menu a').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth < 768) {
+        toggleSidebar();
+      }
+    });
+  });
+</script>

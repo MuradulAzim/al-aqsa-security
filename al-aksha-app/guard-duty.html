@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guard Duty - Al Aksha Security</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { primary: '#1e3a5f', 'primary-dark': '#152a45', 'primary-light': '#2d4a6f' } } }
+    }
+  </script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <div id="navbar"></div>
+  <div class="flex">
+    <div id="sidebar"></div>
+    <main class="flex-1 p-4 md:p-6 md:ml-64 mt-16">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800">Guard Duty</h1>
+          <p class="text-gray-500">Daily guard attendance tracking</p>
+        </div>
+        <button onclick="openAddModal()" class="btn-primary flex items-center gap-2">
+          <span>+</span><span>Add Duty Record</span>
+        </button>
+      </div>
+      
+      <!-- Date Selector -->
+      <div class="bg-white rounded-lg shadow p-4 mb-6">
+        <div class="flex flex-col sm:flex-row gap-4 items-center">
+          <div class="flex items-center gap-2">
+            <label class="font-medium text-gray-700">Date:</label>
+            <input type="date" id="duty-date" class="px-4 py-2 border rounded-lg" onchange="loadGuardDuty()">
+          </div>
+          <div class="flex gap-2">
+            <button onclick="changeDate(-1)" class="px-3 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">← Previous</button>
+            <button onclick="setToday()" class="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200">Today</button>
+            <button onclick="changeDate(1)" class="px-3 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">Next →</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-lg shadow p-4 text-center">
+          <p class="text-3xl font-bold text-blue-600" id="total-assigned">0</p>
+          <p class="text-sm text-gray-500">Total Assigned</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4 text-center">
+          <p class="text-3xl font-bold text-green-600" id="total-present">0</p>
+          <p class="text-sm text-gray-500">Present</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4 text-center">
+          <p class="text-3xl font-bold text-red-600" id="total-absent">0</p>
+          <p class="text-sm text-gray-500">Absent</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4 text-center">
+          <p class="text-3xl font-bold text-purple-600" id="total-clients">0</p>
+          <p class="text-sm text-gray-500">Clients Covered</p>
+        </div>
+      </div>
+      
+      <!-- Guard Duty Table -->
+      <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Guard</th>
+                <th>Client</th>
+                <th>Shift</th>
+                <th>Status</th>
+                <th>Notes</th>
+                <th class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="duty-table"></tbody>
+          </table>
+        </div>
+        <div id="empty-state" class="hidden empty-state">
+          <div class="empty-state-icon">🛡️</div>
+          <p class="text-lg font-medium">No duty records for this date</p>
+          <p class="text-sm">Add guard duty records to track attendance</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add/Edit Modal -->
+  <div id="duty-modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+    <div class="modal-overlay fixed inset-0" onclick="closeModal('duty-modal')"></div>
+    <div class="flex min-h-screen items-center justify-center p-4">
+      <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md transform transition-all slide-up">
+        <div class="flex items-center justify-between p-4 border-b">
+          <h3 class="text-lg font-semibold text-gray-800" id="modal-title">Add Duty Record</h3>
+          <button onclick="closeModal('duty-modal')" class="p-1 rounded-lg hover:bg-gray-100">✕</button>
+        </div>
+        <form id="duty-form" onsubmit="handleSubmit(event)">
+          <div class="p-4 space-y-4">
+            <input type="hidden" id="duty-id">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Employee *</label>
+              <select id="duty-employee" required class="w-full px-3 py-2 border rounded-lg">
+                <option value="">Select Employee</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Client *</label>
+              <select id="duty-client" required class="w-full px-3 py-2 border rounded-lg">
+                <option value="">Select Client</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Shift *</label>
+              <select id="duty-shift" required class="w-full px-3 py-2 border rounded-lg">
+                <option value="day">Day Shift</option>
+                <option value="night">Night Shift</option>
+                <option value="full">Full Day (24hr)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Status *</label>
+              <select id="duty-status" required class="w-full px-3 py-2 border rounded-lg">
+                <option value="present">Present</option>
+                <option value="absent">Absent</option>
+                <option value="late">Late</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+              <textarea id="duty-notes" rows="2" class="w-full px-3 py-2 border rounded-lg" placeholder="Optional notes"></textarea>
+            </div>
+          </div>
+          <div class="flex justify-end gap-2 p-4 border-t bg-gray-50 rounded-b-lg">
+            <button type="button" onclick="closeModal('duty-modal')" class="btn-secondary">Cancel</button>
+            <button type="submit" class="btn-primary">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" class="fixed top-20 right-4 z-50"></div>
+  <div id="loading" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg flex items-center gap-4"><div class="spinner"></div><p>Loading...</p></div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/guard-duty.js"></script>
+  <script>
+    if (!checkAuth()) {} else {
+      loadComponent('navbar', 'components/navbar.html');
+      loadComponent('sidebar', 'components/sidebar.html');
+      initGuardDuty();
+    }
+  </script>
+</body>
+</html>

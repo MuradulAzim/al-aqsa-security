@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clients - Al Aksha Security</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#1e3a5f',
+            'primary-dark': '#152a45',
+            'primary-light': '#2d4a6f'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  
+  <div id="navbar"></div>
+  
+  <div class="flex">
+    <div id="sidebar"></div>
+    
+    <main class="flex-1 p-4 md:p-6 md:ml-64 mt-16">
+      <!-- Page Header -->
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800">Clients</h1>
+          <p class="text-gray-500">Manage your client companies</p>
+        </div>
+        <button onclick="openAddModal()" class="btn-primary flex items-center gap-2">
+          <span>+</span>
+          <span>Add Client</span>
+        </button>
+      </div>
+      
+      <!-- Search -->
+      <div class="bg-white rounded-lg shadow p-4 mb-6">
+        <div class="flex flex-col sm:flex-row gap-4">
+          <div class="flex-1">
+            <input 
+              type="text" 
+              id="search-input"
+              placeholder="Search clients..."
+              class="w-full px-4 py-2 border rounded-lg"
+              oninput="handleSearch()"
+            >
+          </div>
+          <select id="status-filter" class="px-4 py-2 border rounded-lg" onchange="handleFilter()">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Clients Grid -->
+      <div id="clients-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Clients will be loaded here -->
+      </div>
+      
+      <!-- Empty State -->
+      <div id="empty-state" class="hidden bg-white rounded-lg shadow">
+        <div class="empty-state">
+          <div class="empty-state-icon">🏢</div>
+          <p class="text-lg font-medium">No clients found</p>
+          <p class="text-sm">Add your first client to get started</p>
+        </div>
+      </div>
+      
+    </main>
+  </div>
+
+  <!-- Add/Edit Client Modal -->
+  <div id="client-modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+    <div class="modal-overlay fixed inset-0" onclick="closeModal('client-modal')"></div>
+    
+    <div class="flex min-h-screen items-center justify-center p-4">
+      <div class="relative bg-white rounded-lg shadow-xl w-full max-w-lg transform transition-all slide-up">
+        <div class="flex items-center justify-between p-4 border-b">
+          <h3 class="text-lg font-semibold text-gray-800" id="modal-title">Add Client</h3>
+          <button onclick="closeModal('client-modal')" class="p-1 rounded-lg hover:bg-gray-100">
+            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        
+        <form id="client-form" onsubmit="handleSubmit(event)">
+          <div class="p-4 space-y-4 max-h-[60vh] overflow-y-auto">
+            <input type="hidden" id="client-id">
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Company Name *</label>
+              <input type="text" id="client-name" required class="w-full px-3 py-2 border rounded-lg" placeholder="Company name">
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Contact Person</label>
+                <input type="text" id="client-contact" class="w-full px-3 py-2 border rounded-lg" placeholder="Contact name">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Phone *</label>
+                <input type="tel" id="client-phone" required class="w-full px-3 py-2 border rounded-lg" placeholder="Phone number">
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Service Type</label>
+              <select id="client-service" class="w-full px-3 py-2 border rounded-lg">
+                <option value="all">All Services</option>
+                <option value="guard">Guard Services Only</option>
+                <option value="vessel">Vessel Services Only</option>
+                <option value="labor">Day Labor Only</option>
+              </select>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Guard Rate</label>
+                <input type="number" id="client-guard-rate" class="w-full px-3 py-2 border rounded-lg" placeholder="0" min="0">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Vessel Rate</label>
+                <input type="number" id="client-vessel-rate" class="w-full px-3 py-2 border rounded-lg" placeholder="0" min="0">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Labor Rate</label>
+                <input type="number" id="client-labor-rate" class="w-full px-3 py-2 border rounded-lg" placeholder="0" min="0">
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Payment Terms</label>
+              <select id="client-payment" class="w-full px-3 py-2 border rounded-lg">
+                <option value="monthly">Monthly</option>
+                <option value="weekly">Weekly</option>
+                <option value="per-job">Per Job</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <select id="client-status" class="w-full px-3 py-2 border rounded-lg">
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="flex justify-end gap-2 p-4 border-t bg-gray-50 rounded-b-lg">
+            <button type="button" onclick="closeModal('client-modal')" class="btn-secondary">Cancel</button>
+            <button type="submit" class="btn-primary" id="submit-btn">Save Client</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" class="fixed top-20 right-4 z-50"></div>
+  
+  <div id="loading" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg flex items-center gap-4">
+      <div class="spinner"></div>
+      <p class="text-gray-700">Loading...</p>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/clients.js"></script>
+  
+  <script>
+    if (!checkAuth()) {} else {
+      loadComponent('navbar', 'components/navbar.html');
+      loadComponent('sidebar', 'components/sidebar.html');
+      initClients();
+    }
+  </script>
+</body>
+</html>

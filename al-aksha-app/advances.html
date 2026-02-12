@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advances - Al Aksha Security</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { primary: '#1e3a5f', 'primary-dark': '#152a45', 'primary-light': '#2d4a6f' } } }
+    }
+  </script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <div id="navbar"></div>
+  <div class="flex">
+    <div id="sidebar"></div>
+    <main class="flex-1 p-4 md:p-6 md:ml-64 mt-16">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800">Advances</h1>
+          <p class="text-gray-500">Manage employee advance payments</p>
+        </div>
+        <button onclick="openAddModal()" class="btn-primary flex items-center gap-2">
+          <span>+</span><span>New Advance</span>
+        </button>
+      </div>
+      
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-lg shadow p-4 text-center">
+          <p class="text-3xl font-bold text-blue-600" id="total-advances">0</p>
+          <p class="text-sm text-gray-500">Total Advances</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4 text-center">
+          <p class="text-3xl font-bold text-yellow-600" id="pending-count">0</p>
+          <p class="text-sm text-gray-500">Pending</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4 text-center">
+          <p class="text-3xl font-bold text-green-600" id="approved-amount">৳0</p>
+          <p class="text-sm text-gray-500">Approved</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4 text-center">
+          <p class="text-3xl font-bold text-purple-600" id="total-amount">৳0</p>
+          <p class="text-sm text-gray-500">Total Amount</p>
+        </div>
+      </div>
+      
+      <!-- Filters -->
+      <div class="bg-white rounded-lg shadow p-4 mb-6">
+        <div class="flex flex-col sm:flex-row gap-4">
+          <input type="text" id="search-input" placeholder="Search by employee..." class="flex-1 px-4 py-2 border rounded-lg" oninput="handleSearch()">
+          <select id="status-filter" class="px-4 py-2 border rounded-lg" onchange="handleFilter()">
+            <option value="">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Advances Table -->
+      <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th>Reason</th>
+                <th>Status</th>
+                <th class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="advances-table"></tbody>
+          </table>
+        </div>
+        <div id="empty-state" class="hidden empty-state">
+          <div class="empty-state-icon">💰</div>
+          <p class="text-lg font-medium">No advance records found</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add/Edit Modal -->
+  <div id="advance-modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+    <div class="modal-overlay fixed inset-0" onclick="closeModal('advance-modal')"></div>
+    <div class="flex min-h-screen items-center justify-center p-4">
+      <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md transform transition-all slide-up">
+        <div class="flex items-center justify-between p-4 border-b">
+          <h3 class="text-lg font-semibold text-gray-800" id="modal-title">New Advance</h3>
+          <button onclick="closeModal('advance-modal')" class="p-1 rounded-lg hover:bg-gray-100">✕</button>
+        </div>
+        <form id="advance-form" onsubmit="handleSubmit(event)">
+          <div class="p-4 space-y-4">
+            <input type="hidden" id="advance-id">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Employee *</label>
+              <select id="advance-employee" required class="w-full px-3 py-2 border rounded-lg"><option value="">Select Employee</option></select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Amount *</label>
+              <input type="number" id="advance-amount" required class="w-full px-3 py-2 border rounded-lg" min="1" placeholder="0">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Date *</label>
+              <input type="date" id="advance-date" required class="w-full px-3 py-2 border rounded-lg">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+              <textarea id="advance-reason" rows="2" class="w-full px-3 py-2 border rounded-lg" placeholder="Reason for advance"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <select id="advance-status" class="w-full px-3 py-2 border rounded-lg">
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+          </div>
+          <div class="flex justify-end gap-2 p-4 border-t bg-gray-50 rounded-b-lg">
+            <button type="button" onclick="closeModal('advance-modal')" class="btn-secondary">Cancel</button>
+            <button type="submit" class="btn-primary">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" class="fixed top-20 right-4 z-50"></div>
+  <div id="loading" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg flex items-center gap-4"><div class="spinner"></div><p>Loading...</p></div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/advances.js"></script>
+  <script>
+    if (!checkAuth()) {} else {
+      loadComponent('navbar', 'components/navbar.html');
+      loadComponent('sidebar', 'components/sidebar.html');
+      initAdvances();
+    }
+  </script>
+</body>
+</html>

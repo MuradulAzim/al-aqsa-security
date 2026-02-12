@@ -1,0 +1,65 @@
+<!-- Navbar Component -->
+<nav class="bg-primary text-white shadow-lg fixed top-0 left-0 right-0 z-40">
+  <div class="px-4 py-3">
+    <div class="flex items-center justify-between">
+      <!-- Left side: Hamburger + Logo -->
+      <div class="flex items-center gap-4">
+        <!-- Mobile hamburger menu -->
+        <button 
+          id="sidebar-toggle" 
+          class="md:hidden p-2 rounded-lg hover:bg-primary-light transition-colors"
+          onclick="toggleSidebar()"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+        
+        <!-- Company name -->
+        <a href="dashboard.html" class="flex items-center gap-2">
+          <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+            <span class="text-primary font-bold text-sm">AA</span>
+          </div>
+          <span class="font-semibold text-lg hidden sm:inline">Al Aksha Security</span>
+        </a>
+      </div>
+      
+      <!-- Right side: User info + Logout -->
+      <div class="flex items-center gap-4">
+        <!-- User info -->
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 bg-primary-light rounded-full flex items-center justify-center">
+            <span class="text-sm" id="navbar-user-initial">A</span>
+          </div>
+          <div class="hidden sm:block">
+            <p class="text-sm font-medium" id="navbar-user-name">Admin User</p>
+            <p class="text-xs text-gray-300 capitalize" id="navbar-user-role">admin</p>
+          </div>
+        </div>
+        
+        <!-- Logout button -->
+        <button 
+          onclick="logout()" 
+          class="p-2 rounded-lg hover:bg-primary-light transition-colors"
+          title="Logout"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<script>
+  // Update navbar with current user info
+  (function() {
+    const user = getCurrentUser();
+    if (user) {
+      document.getElementById('navbar-user-name').textContent = user.name;
+      document.getElementById('navbar-user-role').textContent = user.role;
+      document.getElementById('navbar-user-initial').textContent = user.name.charAt(0).toUpperCase();
+    }
+  })();
+</script>

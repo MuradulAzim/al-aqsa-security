@@ -1,0 +1,65 @@
+<!-- Modal Component Template -->
+<!-- Usage: Copy and customize for specific modals -->
+
+<!-- Basic Modal Structure -->
+<div id="modal-template" class="hidden fixed inset-0 z-50 overflow-y-auto">
+  <!-- Overlay -->
+  <div class="modal-overlay fixed inset-0" onclick="closeModal('modal-template')"></div>
+  
+  <!-- Modal Content -->
+  <div class="flex min-h-screen items-center justify-center p-4">
+    <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md transform transition-all slide-up">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between p-4 border-b">
+        <h3 class="text-lg font-semibold text-gray-800">
+          Modal Title
+        </h3>
+        <button 
+          onclick="closeModal('modal-template')"
+          class="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+        >
+          <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Modal Body -->
+      <div class="p-4">
+        <p class="text-gray-600">
+          Modal content goes here...
+        </p>
+      </div>
+      
+      <!-- Modal Footer -->
+      <div class="flex justify-end gap-2 p-4 border-t bg-gray-50 rounded-b-lg">
+        <button 
+          onclick="closeModal('modal-template')"
+          class="btn-secondary"
+        >
+          Cancel
+        </button>
+        <button class="btn-primary">
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 
+  MODAL VARIANTS:
+  
+  1. Confirmation Modal (for delete/dangerous actions)
+  2. Form Modal (for add/edit operations)
+  3. View Modal (for displaying details)
+  
+  USAGE EXAMPLE:
+  
+  HTML:
+  <button onclick="openModal('my-modal')">Open Modal</button>
+  
+  JavaScript:
+  openModal('my-modal');   // Opens the modal
+  closeModal('my-modal');  // Closes the modal
+-->

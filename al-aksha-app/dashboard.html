@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Al Aksha Security</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#1e3a5f',
+            'primary-dark': '#152a45',
+            'primary-light': '#2d4a6f'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  
+  <!-- Navbar (loaded dynamically) -->
+  <div id="navbar"></div>
+  
+  <div class="flex">
+    <!-- Sidebar (loaded dynamically) -->
+    <div id="sidebar"></div>
+    
+    <!-- Main Content -->
+    <main class="flex-1 p-4 md:p-6 md:ml-64 mt-16">
+      <!-- Page Header -->
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
+        <p class="text-gray-500">Welcome back, <span id="user-name">User</span></p>
+      </div>
+      
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        <!-- Total Employees -->
+        <div class="bg-white rounded-lg shadow p-5 stat-card-blue card-hover">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-500">Total Employees</p>
+              <p class="text-3xl font-bold text-gray-800" id="stat-employees">0</p>
+            </div>
+            <div class="text-4xl">👥</div>
+          </div>
+        </div>
+        
+        <!-- Total Clients -->
+        <div class="bg-white rounded-lg shadow p-5 stat-card-green card-hover">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-500">Total Clients</p>
+              <p class="text-3xl font-bold text-gray-800" id="stat-clients">0</p>
+            </div>
+            <div class="text-4xl">🏢</div>
+          </div>
+        </div>
+        
+        <!-- Guards On Duty Today -->
+        <div class="bg-white rounded-lg shadow p-5 stat-card-yellow card-hover">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-500">Guards On Duty Today</p>
+              <p class="text-3xl font-bold text-gray-800" id="stat-guards">0</p>
+            </div>
+            <div class="text-4xl">🛡️</div>
+          </div>
+        </div>
+        
+        <!-- Vessel Orders This Month -->
+        <div class="bg-white rounded-lg shadow p-5 stat-card-purple card-hover">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-500">Vessel Orders (This Month)</p>
+              <p class="text-3xl font-bold text-gray-800" id="stat-vessels">0</p>
+            </div>
+            <div class="text-4xl">🚢</div>
+          </div>
+        </div>
+        
+        <!-- Pending Advances -->
+        <div class="bg-white rounded-lg shadow p-5 stat-card-pink card-hover">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-500">Pending Advances</p>
+              <p class="text-3xl font-bold text-gray-800" id="stat-advances">0</p>
+            </div>
+            <div class="text-4xl">💰</div>
+          </div>
+        </div>
+        
+        <!-- This Month Revenue -->
+        <div class="bg-white rounded-lg shadow p-5 stat-card-cyan card-hover">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-500">This Month Revenue</p>
+              <p class="text-2xl font-bold text-gray-800" id="stat-revenue">৳ 0</p>
+            </div>
+            <div class="text-4xl">💵</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Quick Actions -->
+      <div class="bg-white rounded-lg shadow p-6 mb-8" id="quick-actions">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <a 
+            href="guard-duty.html" 
+            class="flex items-center gap-3 p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+          >
+            <span class="text-2xl">🛡️</span>
+            <span class="font-medium text-gray-700">Mark Guard Attendance</span>
+          </a>
+          <a 
+            href="vessel-orders.html" 
+            class="flex items-center gap-3 p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+          >
+            <span class="text-2xl">🚢</span>
+            <span class="font-medium text-gray-700">Create Vessel Order</span>
+          </a>
+          <a 
+            href="day-labor.html" 
+            class="flex items-center gap-3 p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors"
+          >
+            <span class="text-2xl">👷</span>
+            <span class="font-medium text-gray-700">Record Day Labor</span>
+          </a>
+        </div>
+      </div>
+      
+      <!-- Recent Activity / Today's Overview -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Today's Date Info -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-lg font-semibold text-gray-800 mb-4">Today's Overview</h2>
+          <div class="space-y-3">
+            <div class="flex justify-between items-center py-2 border-b">
+              <span class="text-gray-600">Date</span>
+              <span class="font-medium" id="today-date">-</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b">
+              <span class="text-gray-600">Day</span>
+              <span class="font-medium" id="today-day">-</span>
+            </div>
+            <div class="flex justify-between items-center py-2">
+              <span class="text-gray-600">Your Role</span>
+              <span class="font-medium capitalize" id="user-role">-</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- System Info -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-lg font-semibold text-gray-800 mb-4">System Info</h2>
+          <div class="space-y-3">
+            <div class="flex justify-between items-center py-2 border-b">
+              <span class="text-gray-600">App Version</span>
+              <span class="font-medium" id="app-version">1.0.0</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b">
+              <span class="text-gray-600">Data Storage</span>
+              <span class="font-medium" id="data-storage">Local Storage</span>
+            </div>
+            <div class="flex justify-between items-center py-2">
+              <span class="text-gray-600">Session Expires</span>
+              <span class="font-medium" id="session-expires">-</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </main>
+  </div>
+
+  <!-- Toast notification container -->
+  <div id="toast-container" class="fixed top-20 right-4 z-50"></div>
+  
+  <!-- Loading overlay -->
+  <div id="loading" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg flex items-center gap-4">
+      <div class="spinner"></div>
+      <p class="text-gray-700">Loading...</p>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/dashboard.js"></script>
+  
+  <script>
+    // Check authentication on page load
+    if (!checkAuth()) {
+      // Will redirect to index.html
+    } else {
+      // Load reusable components
+      loadComponent('navbar', 'components/navbar.html');
+      loadComponent('sidebar', 'components/sidebar.html');
+      
+      // Initialize dashboard
+      initDashboard();
+    }
+  </script>
+</body>
+</html>

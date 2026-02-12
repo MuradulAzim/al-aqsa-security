@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Salary - Al Aksha Security</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { primary: '#1e3a5f', 'primary-dark': '#152a45', 'primary-light': '#2d4a6f' } } }
+    }
+  </script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <div id="navbar"></div>
+  <div class="flex">
+    <div id="sidebar"></div>
+    <main class="flex-1 p-4 md:p-6 md:ml-64 mt-16">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800">Salary Management</h1>
+          <p class="text-gray-500">Process and track monthly salaries</p>
+        </div>
+        <button onclick="openProcessModal()" class="btn-primary flex items-center gap-2">
+          <span>+</span><span>Process Salary</span>
+        </button>
+      </div>
+      
+      <!-- Month Selector -->
+      <div class="bg-white rounded-lg shadow p-4 mb-6">
+        <div class="flex flex-col sm:flex-row gap-4 items-center">
+          <div class="flex items-center gap-2">
+            <label class="font-medium text-gray-700">Month:</label>
+            <select id="salary-month" class="px-4 py-2 border rounded-lg" onchange="loadSalary()">
+              <option value="1">January</option>
+              <option value="2">February</option>
+              <option value="3">March</option>
+              <option value="4">April</option>
+              <option value="5">May</option>
+              <option value="6">June</option>
+              <option value="7">July</option>
+              <option value="8">August</option>
+              <option value="9">September</option>
+              <option value="10">October</option>
+              <option value="11">November</option>
+              <option value="12">December</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-2">
+            <label class="font-medium text-gray-700">Year:</label>
+            <select id="salary-year" class="px-4 py-2 border rounded-lg" onchange="loadSalary()">
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Summary -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-lg shadow p-4 text-center">
+          <p class="text-3xl font-bold text-blue-600" id="total-employees">0</p>
+          <p class="text-sm text-gray-500">Employees</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4 text-center">
+          <p class="text-3xl font-bold text-green-600" id="total-paid">0</p>
+          <p class="text-sm text-gray-500">Paid</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4 text-center">
+          <p class="text-3xl font-bold text-yellow-600" id="total-pending">0</p>
+          <p class="text-sm text-gray-500">Pending</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4 text-center">
+          <p class="text-3xl font-bold text-purple-600" id="total-amount">৳0</p>
+          <p class="text-sm text-gray-500">Total Salary</p>
+        </div>
+      </div>
+      
+      <!-- Salary Table -->
+      <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Days Worked</th>
+                <th>Gross Salary</th>
+                <th>Advances</th>
+                <th>Net Pay</th>
+                <th>Status</th>
+                <th class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="salary-table"></tbody>
+          </table>
+        </div>
+        <div id="empty-state" class="hidden empty-state">
+          <div class="empty-state-icon">💵</div>
+          <p class="text-lg font-medium">No salary records for this month</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Process Salary Modal -->
+  <div id="salary-modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+    <div class="modal-overlay fixed inset-0" onclick="closeModal('salary-modal')"></div>
+    <div class="flex min-h-screen items-center justify-center p-4">
+      <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md transform transition-all slide-up">
+        <div class="flex items-center justify-between p-4 border-b">
+          <h3 class="text-lg font-semibold text-gray-800" id="modal-title">Process Salary</h3>
+          <button onclick="closeModal('salary-modal')" class="p-1 rounded-lg hover:bg-gray-100">✕</button>
+        </div>
+        <form id="salary-form" onsubmit="handleSubmit(event)">
+          <div class="p-4 space-y-4">
+            <input type="hidden" id="record-id">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Employee *</label>
+              <select id="process-employee" required class="w-full px-3 py-2 border rounded-lg"><option value="">Select Employee</option></select>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Days Worked</label>
+                <input type="number" id="process-days" class="w-full px-3 py-2 border rounded-lg" min="0" max="31" value="0">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Gross Salary</label>
+                <input type="number" id="process-gross" class="w-full px-3 py-2 border rounded-lg" min="0" value="0">
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Advances</label>
+                <input type="number" id="process-advances" class="w-full px-3 py-2 border rounded-lg" min="0" value="0">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Net Pay</label>
+                <input type="number" id="process-net" class="w-full px-3 py-2 border rounded-lg bg-gray-100" readonly>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <select id="process-status" class="w-full px-3 py-2 border rounded-lg">
+                <option value="pending">Pending</option>
+                <option value="paid">Paid</option>
+              </select>
+            </div>
+          </div>
+          <div class="flex justify-end gap-2 p-4 border-t bg-gray-50 rounded-b-lg">
+            <button type="button" onclick="closeModal('salary-modal')" class="btn-secondary">Cancel</button>
+            <button type="submit" class="btn-primary">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" class="fixed top-20 right-4 z-50"></div>
+  <div id="loading" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg flex items-center gap-4"><div class="spinner"></div><p>Loading...</p></div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/salary.js"></script>
+  <script>
+    if (!checkAuth()) {} else {
+      loadComponent('navbar', 'components/navbar.html');
+      loadComponent('sidebar', 'components/sidebar.html');
+      initSalary();
+    }
+  </script>
+</body>
+</html>
