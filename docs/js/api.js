@@ -5,7 +5,36 @@
 
 const API = {
   /**
-   * Base function to call Google Apps Script
+   * GET request for read operations
+   * @param {string} action - The action to perform
+   * @param {object} params - Query parameters
+   * @returns {Promise<object>} - Response from the API
+   */
+  async get(action, params = {}) {
+    // If API_URL is empty, use local storage as fallback
+    if (!CONFIG.API_URL) {
+      return this.localFallback(action, params);
+    }
+    
+    try {
+      showLoading();
+      const queryParams = new URLSearchParams({ action, ...params });
+      const response = await fetch(`${CONFIG.API_URL}?${queryParams}`, {
+        method: "GET"
+      });
+      const result = await response.json();
+      hideLoading();
+      return result;
+    } catch (error) {
+      console.error("API GET Error:", error);
+      hideLoading();
+      // Fallback to localStorage if API fails
+      return this.localFallback(action, params);
+    }
+  },
+
+  /**
+   * POST request for write operations (add, update, delete)
    * @param {string} action - The action to perform
    * @param {object} data - Data to send with the request
    * @returns {Promise<object>} - Response from the API
@@ -20,14 +49,14 @@ const API = {
       showLoading();
       const response = await fetch(CONFIG.API_URL, {
         method: "POST",
-        body: JSON.stringify({ action, ...data }),
+        body: JSON.stringify({ action, data }),
         headers: { "Content-Type": "text/plain" }
       });
       const result = await response.json();
       hideLoading();
       return result;
     } catch (error) {
-      console.error("API Error:", error);
+      console.error("API POST Error:", error);
       hideLoading();
       // Fallback to localStorage if API fails
       return this.localFallback(action, data);
@@ -284,66 +313,66 @@ const API = {
   // API Helper Methods
   // ===================
 
-  // Employee functions
-  async getEmployees() { return this.call("getEmployees"); },
+  // Employee functions (GET for read, POST for write)
+  async getEmployees() { return this.get("getEmployees"); },
   async addEmployee(emp) { return this.call("addEmployee", emp); },
   async updateEmployee(emp) { return this.call("updateEmployee", emp); },
   async deleteEmployee(id) { return this.call("deleteEmployee", { id }); },
 
   // Client functions  
-  async getClients() { return this.call("getClients"); },
+  async getClients() { return this.get("getClients"); },
   async addClient(client) { return this.call("addClient", client); },
   async updateClient(client) { return this.call("updateClient", client); },
   async deleteClient(id) { return this.call("deleteClient", { id }); },
 
   // Guard Duty functions
-  async getGuardDuty(date) { return this.call("getGuardDuty", { date }); },
-  async getAllGuardDuty() { return this.call("getAllGuardDuty"); },
+  async getGuardDuty(date) { return this.get("getGuardDuty", { date }); },
+  async getAllGuardDuty() { return this.get("getGuardDuty"); },
   async addGuardDuty(duty) { return this.call("addGuardDuty", duty); },
   async updateGuardDuty(duty) { return this.call("updateGuardDuty", duty); },
   async deleteGuardDuty(id) { return this.call("deleteGuardDuty", { id }); },
 
   // Vessel Order functions
-  async getVesselOrders() { return this.call("getVesselOrders"); },
+  async getVesselOrders() { return this.get("getVesselOrders"); },
   async addVesselOrder(order) { return this.call("addVesselOrder", order); },
   async updateVesselOrder(order) { return this.call("updateVesselOrder", order); },
   async deleteVesselOrder(id) { return this.call("deleteVesselOrder", { id }); },
   
   // Vessel Personnel functions
-  async getVesselPersonnel(orderId) { return this.call("getVesselPersonnel", { orderId }); },
+  async getVesselPersonnel(orderId) { return this.get("getVesselPersonnel", { orderId }); },
   async addVesselPersonnel(personnel) { return this.call("addVesselPersonnel", personnel); },
   async deleteVesselPersonnel(id) { return this.call("deleteVesselPersonnel", { id }); },
 
   // Day Labor functions
-  async getDayLabor(date) { return this.call("getDayLabor", { date }); },
-  async getAllDayLabor() { return this.call("getAllDayLabor"); },
+  async getDayLabor(date) { return this.get("getDayLabor", { date }); },
+  async getAllDayLabor() { return this.get("getDayLabor"); },
   async addDayLabor(labor) { return this.call("addDayLabor", labor); },
   async updateDayLabor(labor) { return this.call("updateDayLabor", labor); },
   async deleteDayLabor(id) { return this.call("deleteDayLabor", { id }); },
   
   // Day Labor Workers
-  async getDayLaborWorkers(dayLaborId) { return this.call("getDayLaborWorkers", { dayLaborId }); },
+  async getDayLaborWorkers(dayLaborId) { return this.get("getDayLaborWorkers", { dayLaborId }); },
   async addDayLaborWorker(worker) { return this.call("addDayLaborWorker", worker); },
   async deleteDayLaborWorker(id) { return this.call("deleteDayLaborWorker", { id }); },
 
   // Advance functions
-  async getAdvances(employeeId = null) { return this.call("getAdvances", { employeeId }); },
+  async getAdvances(employeeId = null) { return this.get("getAdvances", employeeId ? { employeeId } : {}); },
   async addAdvance(advance) { return this.call("addAdvance", advance); },
   async updateAdvance(advance) { return this.call("updateAdvance", advance); },
   async deleteAdvance(id) { return this.call("deleteAdvance", { id }); },
 
   // Salary functions
-  async getSalary(month, year) { return this.call("getSalary", { month, year }); },
-  async getAllSalary() { return this.call("getAllSalary"); },
+  async getSalary(month, year) { return this.get("getSalary", { month, year }); },
+  async getAllSalary() { return this.get("getSalary"); },
   async processSalary(salary) { return this.call("processSalary", salary); },
   async updateSalary(salary) { return this.call("updateSalary", salary); },
 
   // Invoice functions
-  async getInvoices() { return this.call("getInvoices"); },
+  async getInvoices() { return this.get("getInvoices"); },
   async addInvoice(invoice) { return this.call("addInvoice", invoice); },
   async updateInvoice(invoice) { return this.call("updateInvoice", invoice); },
   async deleteInvoice(id) { return this.call("deleteInvoice", { id }); },
 
   // Dashboard
-  async getDashboardData() { return this.call("getDashboardData"); }
+  async getDashboardData() { return this.get("getDashboardStats"); }
 };
