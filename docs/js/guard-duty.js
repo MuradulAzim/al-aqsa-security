@@ -50,8 +50,8 @@ function renderEmployeeDropdown(filteredEmployees) {
   if (filteredEmployees.length === 0) {
     dropdown.innerHTML = '<div class="px-3 py-2 text-gray-500">No employees found</div>';
   } else {
-    dropdown.innerHTML = filteredEmployees.map(e => 
-      `<div class="px-3 py-2 hover:bg-blue-50 cursor-pointer" onclick="selectEmployee('${e.id}', '${escapeHtml(e.name)}')">${escapeHtml(e.name)} <span class="text-gray-400 text-sm">(${e.role || ''})</span></div>`
+    dropdown.innerHTML = filteredEmployees.map((e, index) => 
+      `<div class="px-3 py-2 hover:bg-blue-50 cursor-pointer" data-id="${e.id}" data-name="${escapeHtml(e.name)}" onclick="selectEmployeeByIndex(this)">${escapeHtml(e.name)} <span class="text-gray-400 text-sm">(${e.role || ''})</span></div>`
     ).join('');
   }
 }
@@ -61,10 +61,26 @@ function renderClientDropdown(filteredClients) {
   if (filteredClients.length === 0) {
     dropdown.innerHTML = '<div class="px-3 py-2 text-gray-500">No clients found</div>';
   } else {
-    dropdown.innerHTML = filteredClients.map(c => 
-      `<div class="px-3 py-2 hover:bg-blue-50 cursor-pointer" onclick="selectClient('${c.id}', '${escapeHtml(c.name)}')">${escapeHtml(c.name)}</div>`
+    dropdown.innerHTML = filteredClients.map((c, index) => 
+      `<div class="px-3 py-2 hover:bg-blue-50 cursor-pointer" data-id="${c.id}" data-name="${escapeHtml(c.name)}" onclick="selectClientByIndex(this)">${escapeHtml(c.name)}</div>`
     ).join('');
   }
+}
+
+function selectEmployeeByIndex(element) {
+  const id = element.dataset.id;
+  const name = element.dataset.name;
+  document.getElementById('duty-employee-id').value = id;
+  document.getElementById('duty-employee').value = name;
+  hideDropdown('employee-dropdown');
+}
+
+function selectClientByIndex(element) {
+  const id = element.dataset.id;
+  const name = element.dataset.name;
+  document.getElementById('duty-client-id').value = id;
+  document.getElementById('duty-client').value = name;
+  hideDropdown('client-dropdown');
 }
 
 function filterEmployees(searchText) {
@@ -98,18 +114,6 @@ function showClientDropdown() {
 
 function hideDropdown(dropdownId) {
   document.getElementById(dropdownId).classList.add('hidden');
-}
-
-function selectEmployee(id, name) {
-  document.getElementById('duty-employee-id').value = id;
-  document.getElementById('duty-employee').value = name;
-  hideDropdown('employee-dropdown');
-}
-
-function selectClient(id, name) {
-  document.getElementById('duty-client-id').value = id;
-  document.getElementById('duty-client').value = name;
-  hideDropdown('client-dropdown');
 }
 
 async function loadGuardDuty() {

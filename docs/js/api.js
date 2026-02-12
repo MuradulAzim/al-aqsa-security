@@ -18,9 +18,11 @@ const API = {
     
     try {
       showLoading();
-      const queryParams = new URLSearchParams({ action, ...params });
+      // Add cache-busting parameter to prevent stale data
+      const queryParams = new URLSearchParams({ action, ...params, _t: Date.now() });
       const response = await fetch(`${CONFIG.API_URL}?${queryParams}`, {
-        method: "GET"
+        method: "GET",
+        cache: "no-store"
       });
       const result = await response.json();
       hideLoading();

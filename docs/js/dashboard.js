@@ -73,12 +73,12 @@ async function loadDashboardData() {
       const data = result.data;
       
       // Update stat cards with animation
-      // Backend returns: activeEmployees, activeClients, presentGuards, todayDayLabor, monthlyRevenue, totalAdvances
+      // Backend returns: activeEmployees, activeClients, presentGuards, todayDayLabor, monthlyVesselOrders, monthlyRevenue, totalAdvances, pendingAdvances
       animateNumber('stat-employees', data.activeEmployees || 0);
       animateNumber('stat-clients', data.activeClients || 0);
       animateNumber('stat-guards', data.presentGuards || 0);
-      animateNumber('stat-vessels', data.todayDayLabor || 0);
-      animateNumber('stat-advances', data.totalAdvances || 0);
+      animateNumber('stat-vessels', data.monthlyVesselOrders || 0);
+      animateNumber('stat-advances', data.pendingAdvances || 0);
       
       // Format revenue with currency
       const revenue = data.monthlyRevenue || 0;

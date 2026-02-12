@@ -44,8 +44,8 @@ function initSpreadsheet() {
   const sheetConfigs = [
     { name: SHEETS.EMPLOYEES, headers: ['id', 'name', 'pin', 'role', 'phone', 'nid', 'salary', 'status', 'createdAt'] },
     { name: SHEETS.CLIENTS, headers: ['id', 'name', 'address', 'phone', 'email', 'contactPerson', 'rate', 'status', 'createdAt'] },
-    { name: SHEETS.GUARD_DUTY, headers: ['id', 'employeeId', 'employeeName', 'clientId', 'date', 'status', 'checkIn', 'checkOut', 'notes'] },
-    { name: SHEETS.VESSEL_ORDERS, headers: ['id', 'clientId', 'clientName', 'vesselName', 'date', 'guards', 'amount', 'status', 'notes'] },
+    { name: SHEETS.GUARD_DUTY, headers: ['id', 'employeeId', 'employeeName', 'clientId', 'clientName', 'date', 'shift', 'status', 'notes'] },
+    { name: SHEETS.VESSEL_ORDERS, headers: ['id', 'clientId', 'clientName', 'motherVessel', 'lighterVessel', 'employeeId', 'employeeName', 'dutyStartDate', 'dutyStartShift', 'dutyEndDate', 'dutyEndShift', 'dutyDays', 'ratePerDay', 'revenue', 'conveyance', 'totalAmount', 'status', 'notes', 'createdAt'] },
     { name: SHEETS.DAY_LABOR, headers: ['id', 'employeeId', 'employeeName', 'date', 'hours', 'rate', 'amount', 'clientId', 'clientName', 'notes'] },
     { name: SHEETS.ADVANCES, headers: ['id', 'employeeId', 'employeeName', 'amount', 'date', 'reason', 'status', 'approvedBy'] },
     { name: SHEETS.SALARY, headers: ['id', 'employeeId', 'employeeName', 'month', 'year', 'daysWorked', 'grossSalary', 'advances', 'netPay', 'status', 'paidDate'] },
@@ -362,6 +362,13 @@ function getDashboardStats() {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
   
+  // Vessel orders this month
+  const vesselOrders = getAll(SHEETS.VESSEL_ORDERS);
+  const monthlyVesselOrders = vesselOrders.filter(vo => {
+    const date = new Date(vo.date || vo.dutyStartDate);
+    return date >= monthStart && date <= monthEnd;
+  }).length;
+  
   const invoices = getAll(SHEETS.INVOICES);
   const monthlyInvoices = invoices.filter(inv => {
     const date = new Date(inv.date);
@@ -376,13 +383,18 @@ function getDashboardStats() {
   });
   const totalAdvances = monthlyAdvances.reduce((sum, adv) => sum + (parseFloat(adv.amount) || 0), 0);
   
+  // Count pending advances
+  const pendingAdvances = advances.filter(adv => adv.status === 'pending').length;
+  
   return {
     activeEmployees,
     activeClients,
     presentGuards,
     todayDayLabor,
+    monthlyVesselOrders,
     monthlyRevenue,
-    totalAdvances
+    totalAdvances,
+    pendingAdvances
   };
 }
 
