@@ -73,14 +73,15 @@ async function loadDashboardData() {
       const data = result.data;
       
       // Update stat cards with animation
-      animateNumber('stat-employees', data.totalEmployees || 0);
-      animateNumber('stat-clients', data.totalClients || 0);
-      animateNumber('stat-guards', data.guardsToday || 0);
-      animateNumber('stat-vessels', data.vesselOrdersThisMonth || 0);
-      animateNumber('stat-advances', data.pendingAdvances || 0);
+      // Backend returns: activeEmployees, activeClients, presentGuards, todayDayLabor, monthlyRevenue, totalAdvances
+      animateNumber('stat-employees', data.activeEmployees || 0);
+      animateNumber('stat-clients', data.activeClients || 0);
+      animateNumber('stat-guards', data.presentGuards || 0);
+      animateNumber('stat-vessels', data.todayDayLabor || 0);
+      animateNumber('stat-advances', data.totalAdvances || 0);
       
       // Format revenue with currency
-      const revenue = data.monthRevenue || 0;
+      const revenue = data.monthlyRevenue || 0;
       document.getElementById('stat-revenue').textContent = formatCurrency(revenue);
     } else {
       showToast('Failed to load dashboard data', 'error');

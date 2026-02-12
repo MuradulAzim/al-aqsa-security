@@ -16,8 +16,11 @@ async function initGuardDuty() {
 async function loadEmployees() {
   const result = await API.getEmployees();
   if (result.success) {
-    employees = (result.data || []).filter(e => e.status === 'active' && (e.role === 'guard' || e.role === 'supervisor'));
+    // Show all active employees (roles: Security Guard, Escort, Labor, etc.)
+    employees = (result.data || []).filter(e => e.status === 'active');
     populateEmployeeSelect();
+  } else {
+    console.error('Failed to load employees:', result.message);
   }
 }
 
@@ -26,19 +29,87 @@ async function loadClients() {
   if (result.success) {
     clients = (result.data || []).filter(c => c.status === 'active');
     populateClientSelect();
+  } else {
+    console.error('Failed to load clients:', result.message);
   }
 }
 
+// Searchable dropdown functions
 function populateEmployeeSelect() {
-  const select = document.getElementById('duty-employee');
-  select.innerHTML = '<option value="">Select Employee</option>' + 
-    employees.map(e => `<option value="${e.id}" data-name="${escapeHtml(e.name)}">${escapeHtml(e.name)}</option>`).join('');
+  // Initial population - no longer using select, but keeping function for backward compatibility
+  renderEmployeeDropdown(employees);
 }
 
 function populateClientSelect() {
-  const select = document.getElementById('duty-client');
-  select.innerHTML = '<option value="">Select Client</option>' + 
-    clients.map(c => `<option value="${c.id}" data-name="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`).join('');
+  // Initial population - no longer using select, but keeping function for backward compatibility
+  renderClientDropdown(clients);
+}
+
+function renderEmployeeDropdown(filteredEmployees) {
+  const dropdown = document.getElementById('employee-dropdown');
+  if (filteredEmployees.length === 0) {
+    dropdown.innerHTML = '<div class="px-3 py-2 text-gray-500">No employees found</div>';
+  } else {
+    dropdown.innerHTML = filteredEmployees.map(e => 
+      `<div class="px-3 py-2 hover:bg-blue-50 cursor-pointer" onclick="selectEmployee('${e.id}', '${escapeHtml(e.name)}')">${escapeHtml(e.name)} <span class="text-gray-400 text-sm">(${e.role || ''})</span></div>`
+    ).join('');
+  }
+}
+
+function renderClientDropdown(filteredClients) {
+  const dropdown = document.getElementById('client-dropdown');
+  if (filteredClients.length === 0) {
+    dropdown.innerHTML = '<div class="px-3 py-2 text-gray-500">No clients found</div>';
+  } else {
+    dropdown.innerHTML = filteredClients.map(c => 
+      `<div class="px-3 py-2 hover:bg-blue-50 cursor-pointer" onclick="selectClient('${c.id}', '${escapeHtml(c.name)}')">${escapeHtml(c.name)}</div>`
+    ).join('');
+  }
+}
+
+function filterEmployees(searchText) {
+  const search = searchText.toLowerCase();
+  const filtered = employees.filter(e => 
+    e.name.toLowerCase().includes(search) || 
+    (e.role && e.role.toLowerCase().includes(search)) ||
+    (e.phone && e.phone.includes(search))
+  );
+  renderEmployeeDropdown(filtered);
+  showEmployeeDropdown();
+}
+
+function filterClients(searchText) {
+  const search = searchText.toLowerCase();
+  const filtered = clients.filter(c => 
+    c.name.toLowerCase().includes(search) || 
+    (c.contact && c.contact.toLowerCase().includes(search))
+  );
+  renderClientDropdown(filtered);
+  showClientDropdown();
+}
+
+function showEmployeeDropdown() {
+  document.getElementById('employee-dropdown').classList.remove('hidden');
+}
+
+function showClientDropdown() {
+  document.getElementById('client-dropdown').classList.remove('hidden');
+}
+
+function hideDropdown(dropdownId) {
+  document.getElementById(dropdownId).classList.add('hidden');
+}
+
+function selectEmployee(id, name) {
+  document.getElementById('duty-employee-id').value = id;
+  document.getElementById('duty-employee').value = name;
+  hideDropdown('employee-dropdown');
+}
+
+function selectClient(id, name) {
+  document.getElementById('duty-client-id').value = id;
+  document.getElementById('duty-client').value = name;
+  hideDropdown('client-dropdown');
 }
 
 async function loadGuardDuty() {
@@ -116,6 +187,9 @@ function openAddModal() {
   editingId = null;
   document.getElementById('modal-title').textContent = 'Add Duty Record';
   clearForm('duty-form');
+  // Clear hidden ID fields for searchable inputs
+  document.getElementById('duty-employee-id').value = '';
+  document.getElementById('duty-client-id').value = '';
   document.getElementById('duty-status').value = 'present';
   openModal('duty-modal');
 }
@@ -127,8 +201,15 @@ function editRecord(id) {
   editingId = id;
   document.getElementById('modal-title').textContent = 'Edit Duty Record';
   document.getElementById('duty-id').value = record.id;
-  document.getElementById('duty-employee').value = record.employeeId || '';
-  document.getElementById('duty-client').value = record.clientId || '';
+  
+  // Set employee searchable input
+  document.getElementById('duty-employee-id').value = record.employeeId || '';
+  document.getElementById('duty-employee').value = record.employeeName || '';
+  
+  // Set client searchable input
+  document.getElementById('duty-client-id').value = record.clientId || '';
+  document.getElementById('duty-client').value = record.clientName || '';
+  
   document.getElementById('duty-shift').value = record.shift || 'day';
   document.getElementById('duty-status').value = record.status || 'present';
   document.getElementById('duty-notes').value = record.notes || '';
@@ -138,15 +219,28 @@ function editRecord(id) {
 async function handleSubmit(event) {
   event.preventDefault();
   
-  const employeeSelect = document.getElementById('duty-employee');
-  const clientSelect = document.getElementById('duty-client');
+  // Get values from hidden ID fields and display inputs
+  const employeeId = document.getElementById('duty-employee-id').value;
+  const employeeName = document.getElementById('duty-employee').value;
+  const clientId = document.getElementById('duty-client-id').value;
+  const clientName = document.getElementById('duty-client').value;
+  
+  // Validate that both employee and client are selected (not just typed)
+  if (!employeeId) {
+    showToast('Please select an employee from the dropdown', 'error');
+    return;
+  }
+  if (!clientId) {
+    showToast('Please select a client from the dropdown', 'error');
+    return;
+  }
   
   const data = {
     date: document.getElementById('duty-date').value,
-    employeeId: employeeSelect.value,
-    employeeName: employeeSelect.options[employeeSelect.selectedIndex]?.dataset?.name || '',
-    clientId: clientSelect.value,
-    clientName: clientSelect.options[clientSelect.selectedIndex]?.dataset?.name || '',
+    employeeId: employeeId,
+    employeeName: employeeName,
+    clientId: clientId,
+    clientName: clientName,
     shift: document.getElementById('duty-shift').value,
     status: document.getElementById('duty-status').value,
     notes: document.getElementById('duty-notes').value.trim()
