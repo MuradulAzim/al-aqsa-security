@@ -362,19 +362,24 @@ function getDashboardStats() {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
   
-  // Vessel orders this month
+  // Vessel orders this month (uses dutyStartDate from new schema)
   const vesselOrders = getAll(SHEETS.VESSEL_ORDERS);
   const monthlyVesselOrders = vesselOrders.filter(vo => {
-    const date = new Date(vo.date || vo.dutyStartDate);
-    return date >= monthStart && date <= monthEnd;
+    const date = new Date(vo.dutyStartDate);
+    return !isNaN(date) && date >= monthStart && date <= monthEnd;
   }).length;
   
+  Logger.log('[PHASE4] monthlyVesselOrders: ' + monthlyVesselOrders + ' (total records: ' + vesselOrders.length + ')');
+  
+  // Revenue is calculated ONLY from invoices (Invoice-Only Revenue Model)
   const invoices = getAll(SHEETS.INVOICES);
   const monthlyInvoices = invoices.filter(inv => {
     const date = new Date(inv.date);
     return date >= monthStart && date <= monthEnd;
   });
   const monthlyRevenue = monthlyInvoices.reduce((sum, inv) => sum + (parseFloat(inv.total) || 0), 0);
+  
+  Logger.log('[PHASE4] monthlyRevenue (invoice-only): ' + monthlyRevenue + ' (invoices count: ' + monthlyInvoices.length + ')');
   
   const advances = getAll(SHEETS.ADVANCES);
   const monthlyAdvances = advances.filter(adv => {
