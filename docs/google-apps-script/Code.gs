@@ -16,7 +16,7 @@
  * - employees: id, name, pin, role, phone, nid, salary, status, createdAt
  * - clients: id, name, address, phone, email, contactPerson, rate, status, createdAt
  * - guardDuty: id, employeeId, employeeName, clientId, date, status, checkIn, checkOut, notes
- * - vesselOrders: id, clientId, clientName, vesselName, date, guards, amount, status, notes
+ * - vesselOrders: id, clientId, clientName, motherVessel, lighterVessel, employeeId, employeeName, dutyStartDate, dutyStartShift, dutyEndDate, dutyEndShift, dutyDays, ratePerDay, revenue, conveyance, totalAmount, status, notes, createdAt
  * - dayLabor: id, employeeId, employeeName, date, hours, rate, amount, clientId, clientName, notes
  * - advances: id, employeeId, employeeName, amount, date, reason, status, approvedBy
  * - salary: id, employeeId, employeeName, month, year, daysWorked, grossSalary, advances, netPay, status, paidDate

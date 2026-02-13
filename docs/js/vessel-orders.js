@@ -160,6 +160,11 @@ function calculateDutyDays() {
   // Minimum 0.5 day
   days = Math.max(days, 0.5);
   
+  console.log('[PHASE2] calculateDutyDays:', {
+    startDate, startShift, endDate, endShift,
+    calculatedDays: days
+  });
+  
   document.getElementById('calculated-days').textContent = days;
   calculateRevenue();
   return days;
@@ -170,6 +175,14 @@ function calculateRevenue() {
   const days = parseFloat(document.getElementById('calculated-days').textContent) || 0;
   const rate = parseFloat(document.getElementById('order-rate').value) || 0;
   const revenue = days * rate;
+  
+  console.log('[PHASE2] calculateRevenue:', {
+    dutyDays: days,
+    ratePerDay: rate,
+    revenue: revenue,
+    formula: `${days} × ${rate} = ${revenue}`
+  });
+  
   document.getElementById('order-revenue').value = revenue;
   calculateTotal();
 }
@@ -177,7 +190,16 @@ function calculateRevenue() {
 function calculateTotal() {
   const revenue = parseFloat(document.getElementById('order-revenue').value) || 0;
   const conveyance = parseFloat(document.getElementById('order-conveyance').value) || 0;
-  document.getElementById('order-total').value = revenue + conveyance;
+  const total = revenue + conveyance;
+  
+  console.log('[PHASE2] calculateTotal:', {
+    revenue: revenue,
+    conveyance: conveyance,
+    totalAmount: total,
+    formula: `${revenue} + ${conveyance} = ${total}`
+  });
+  
+  document.getElementById('order-total').value = total;
 }
 
 // ===== TABLE RENDERING =====
@@ -374,6 +396,11 @@ async function handleSubmit(event) {
     status: document.getElementById('order-status').value,
     notes: document.getElementById('order-notes').value.trim()
   };
+  
+  console.log('[PHASE2] ===== FINAL PAYLOAD BEFORE API SUBMISSION =====');
+  console.log('[PHASE2] Mode:', editingId ? 'UPDATE' : 'CREATE');
+  console.log('[PHASE2] Payload:', JSON.stringify(data, null, 2));
+  console.table(data);
   
   try {
     showLoading();
