@@ -78,11 +78,7 @@ function renderEmployees() {
         </td>
         <td>${escapeHtml(emp.phone || '-')}</td>
         <td><span class="capitalize">${emp.role || '-'}</span></td>
-        <td>
-          ${emp.salary ? formatCurrency(emp.salary) + '/month' : ''}
-          ${emp.dailyRate ? formatCurrency(emp.dailyRate) + '/day' : ''}
-          ${!emp.salary && !emp.dailyRate ? '-' : ''}
-        </td>
+        <td>${emp.salary ? formatCurrency(emp.salary) + '/month' : '-'}</td>
         <td>
           <span class="badge ${status.class}">${status.text}</span>
         </td>
@@ -141,17 +137,18 @@ function editEmployee(id) {
   document.getElementById('modal-title').textContent = 'Edit Employee';
   document.getElementById('submit-btn').textContent = 'Update Employee';
   
-  // Fill form
+  // Fill form with backend-supported fields only
   document.getElementById('employee-id').value = emp.id;
   document.getElementById('emp-name').value = emp.name || '';
   document.getElementById('emp-phone').value = emp.phone || '';
   document.getElementById('emp-nid').value = emp.nid || '';
   document.getElementById('emp-role').value = emp.role || '';
   document.getElementById('emp-salary').value = emp.salary || '';
-  document.getElementById('emp-daily-rate').value = emp.dailyRate || '';
-  document.getElementById('emp-payment').value = emp.paymentMethod || 'cash';
-  document.getElementById('emp-account').value = emp.accountNumber || '';
   document.getElementById('emp-status').value = emp.status || 'active';
+  // Note: dailyRate, paymentMethod, accountNumber are not persisted
+  document.getElementById('emp-daily-rate').value = '';
+  document.getElementById('emp-payment').value = 'cash';
+  document.getElementById('emp-account').value = '';
   
   openModal('employee-modal');
 }
@@ -173,17 +170,17 @@ function viewEmployee(id) {
 async function handleSubmit(event) {
   event.preventDefault();
   
+  // Only include fields supported by backend schema:
+  // id, name, pin, role, phone, nid, salary, status, createdAt
   const empData = {
     name: document.getElementById('emp-name').value.trim(),
     phone: document.getElementById('emp-phone').value.trim(),
     nid: document.getElementById('emp-nid').value.trim(),
     role: document.getElementById('emp-role').value,
     salary: Number(document.getElementById('emp-salary').value) || 0,
-    dailyRate: Number(document.getElementById('emp-daily-rate').value) || 0,
-    paymentMethod: document.getElementById('emp-payment').value,
-    accountNumber: document.getElementById('emp-account').value.trim(),
     status: document.getElementById('emp-status').value
   };
+  // Note: dailyRate, paymentMethod, accountNumber are NOT supported by backend
   
   // Validation
   if (!empData.name || !empData.phone || !empData.role) {

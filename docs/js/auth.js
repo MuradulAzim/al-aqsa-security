@@ -65,7 +65,7 @@ function isLoggedIn() {
   }
   
   // Check if session has expired
-  const loginTime = new Date(session.loginTime);
+  const loginTime = parseDate(session.loginTime);
   const now = new Date();
   const elapsed = now - loginTime;
   

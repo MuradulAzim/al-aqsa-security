@@ -4,12 +4,61 @@
  */
 
 /**
+ * Safely converts a date input to a Date object (locale-independent).
+ * Explicitly parses YYYY-MM-DD and ISO datetime formats.
+ * @param {Date|string|null|undefined} input - Date object or string
+ * @returns {Date} - Valid Date object (defaults to current date on invalid input)
+ */
+function toDateObject(input) {
+  // Already a valid Date object
+  if (input instanceof Date && !isNaN(input.getTime())) {
+    return input;
+  }
+  
+  // Handle null/undefined/empty
+  if (!input) {
+    return new Date();
+  }
+  
+  // Convert to string and trim
+  const str = String(input).trim();
+  if (!str) {
+    return new Date();
+  }
+  
+  // Try YYYY-MM-DD format (most common from backend)
+  const isoDateMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoDateMatch) {
+    const [, year, month, day] = isoDateMatch;
+    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  }
+  
+  // Try ISO datetime format (YYYY-MM-DDTHH:MM:SS)
+  const isoDateTimeMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/);
+  if (isoDateTimeMatch) {
+    const [, year, month, day, hour, min, sec] = isoDateTimeMatch;
+    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(min), parseInt(sec));
+  }
+  
+  // Try DD/MM/YYYY format (display format used in this system)
+  const ddmmyyyyMatch = str.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (ddmmyyyyMatch) {
+    const [, day, month, year] = ddmmyyyyMatch;
+    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  }
+  
+  // Fallback: return current date (safer than locale-sensitive parsing)
+  console.warn('toDateObject: Unrecognized date format, using current date:', input);
+  return new Date();
+}
+
+/**
  * Formats a date to DD/MM/YYYY format
  * @param {Date|string} date - Date to format
  * @returns {string} - Formatted date string
  */
 function formatDate(date) {
-  const d = new Date(date);
+  const d = toDateObject(date);
   const day = String(d.getDate()).padStart(2, '0');
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const year = d.getFullYear();
@@ -22,7 +71,7 @@ function formatDate(date) {
  * @returns {string} - Formatted date string
  */
 function formatDateISO(date) {
-  const d = new Date(date);
+  const d = toDateObject(date);
   const day = String(d.getDate()).padStart(2, '0');
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const year = d.getFullYear();
@@ -35,7 +84,7 @@ function formatDateISO(date) {
  * @returns {string} - Formatted date/time string
  */
 function formatDateTime(date) {
-  const d = new Date(date);
+  const d = toDateObject(date);
   const dateStr = formatDate(d);
   let hours = d.getHours();
   const minutes = String(d.getMinutes()).padStart(2, '0');
@@ -259,13 +308,12 @@ function getCurrentMonthYear() {
 }
 
 /**
- * Parses a date string to Date object
+ * Parses a date string to Date object (locale-independent)
  * @param {string} dateStr - Date string in various formats
  * @returns {Date}
  */
 function parseDate(dateStr) {
-  if (!dateStr) return new Date();
-  return new Date(dateStr);
+  return toDateObject(dateStr);
 }
 
 /**

@@ -138,8 +138,8 @@ function calculateDutyDays() {
   }
   
   // If no end date, duty is ongoing - calculate from start to today
-  const start = new Date(startDate);
-  const end = endDate ? new Date(endDate) : new Date();
+  const start = parseDate(startDate);
+  const end = endDate ? parseDate(endDate) : new Date();
   
   // Calculate base days
   let days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));

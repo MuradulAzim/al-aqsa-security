@@ -66,7 +66,7 @@ function renderClients() {
           </div>
           <div class="flex items-center gap-2">
             <span>💰</span>
-            <span>Guard: ${client.guardRate ? formatCurrency(client.guardRate) : '-'}</span>
+            <span>Rate: ${client.rate ? formatCurrency(client.rate) : '-'}</span>
           </div>
         </div>
         
@@ -96,16 +96,18 @@ function editClient(id) {
   document.getElementById('modal-title').textContent = 'Edit Client';
   document.getElementById('submit-btn').textContent = 'Update Client';
   
+  // Fill form with backend-supported fields only
   document.getElementById('client-id').value = client.id;
   document.getElementById('client-name').value = client.name || '';
   document.getElementById('client-contact').value = client.contactPerson || '';
   document.getElementById('client-phone').value = client.phone || '';
-  document.getElementById('client-service').value = client.serviceType || 'all';
-  document.getElementById('client-guard-rate').value = client.guardRate || '';
-  document.getElementById('client-vessel-rate').value = client.vesselRate || '';
-  document.getElementById('client-labor-rate').value = client.laborRate || '';
-  document.getElementById('client-payment').value = client.paymentTerms || 'monthly';
+  document.getElementById('client-guard-rate').value = client.rate || '';
   document.getElementById('client-status').value = client.status || 'active';
+  // Note: serviceType, vesselRate, laborRate, paymentTerms are not persisted
+  document.getElementById('client-service').value = 'all';
+  document.getElementById('client-vessel-rate').value = '';
+  document.getElementById('client-labor-rate').value = '';
+  document.getElementById('client-payment').value = 'monthly';
   
   openModal('client-modal');
 }
@@ -113,17 +115,16 @@ function editClient(id) {
 async function handleSubmit(event) {
   event.preventDefault();
   
+  // Only include fields supported by backend schema:
+  // id, name, address, phone, email, contactPerson, rate, status, createdAt
   const clientData = {
     name: document.getElementById('client-name').value.trim(),
     contactPerson: document.getElementById('client-contact').value.trim(),
     phone: document.getElementById('client-phone').value.trim(),
-    serviceType: document.getElementById('client-service').value,
-    guardRate: Number(document.getElementById('client-guard-rate').value) || 0,
-    vesselRate: Number(document.getElementById('client-vessel-rate').value) || 0,
-    laborRate: Number(document.getElementById('client-labor-rate').value) || 0,
-    paymentTerms: document.getElementById('client-payment').value,
+    rate: Number(document.getElementById('client-guard-rate').value) || 0,
     status: document.getElementById('client-status').value
   };
+  // Note: serviceType, vesselRate, laborRate, paymentTerms are NOT supported by backend
   
   if (!clientData.name || !clientData.phone) {
     showToast('Please fill in all required fields', 'error');

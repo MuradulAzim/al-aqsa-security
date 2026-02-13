@@ -264,6 +264,7 @@ const API = {
 
   /**
    * Gets dashboard summary data
+   * Field names and logic must match backend getDashboardStats() exactly
    */
   localGetDashboardData() {
     const employees = getFromStorage(CONFIG.STORAGE_KEYS.EMPLOYEES, []);
@@ -272,41 +273,62 @@ const API = {
     const vesselOrders = getFromStorage(CONFIG.STORAGE_KEYS.VESSEL_ORDERS, []);
     const advances = getFromStorage(CONFIG.STORAGE_KEYS.ADVANCES, []);
     const invoices = getFromStorage(CONFIG.STORAGE_KEYS.INVOICES, []);
+    const dayLabor = getFromStorage(CONFIG.STORAGE_KEYS.DAY_LABOR, []);
     
     const today = getToday();
     const { month, year } = getCurrentMonthYear();
+    const monthStart = new Date(year, month - 1, 1);
+    const monthEnd = new Date(year, month, 0);
     
-    // Count guards on duty today
-    const guardsToday = guardDuty.filter(d => d.date === today).length;
+    // Active counts
+    const activeEmployees = employees.filter(e => e.status === 'active').length;
+    const activeClients = clients.filter(c => c.status === 'active').length;
     
-    // Count vessel orders this month
-    const vesselOrdersThisMonth = vesselOrders.filter(o => {
-      const orderDate = new Date(o.startDate);
-      return orderDate.getMonth() + 1 === month && orderDate.getFullYear() === year;
+    // Guards present today (must match backend: filter by status === 'present')
+    const presentGuards = guardDuty.filter(g => g.date === today && g.status === 'present').length;
+    
+    // Day labor records for today
+    const todayDayLabor = dayLabor.filter(d => d.date === today).length;
+    
+    // Vessel orders this month (uses dutyStartDate, fallback to startDate for backward compat)
+    const monthlyVesselOrders = vesselOrders.filter(o => {
+      const dateStr = o.dutyStartDate || o.startDate;
+      if (!dateStr) return false;
+      const orderDate = parseDate(dateStr);
+      return !isNaN(orderDate.getTime()) && orderDate >= monthStart && orderDate <= monthEnd;
     }).length;
     
-    // Count pending advances
-    const pendingAdvances = advances.filter(a => a.status === 'pending').length;
-    
-    // Calculate this month's revenue from paid invoices
-    const monthRevenue = invoices
+    // Monthly revenue from invoices (matches backend: uses inv.date, includes ALL invoices)
+    const monthlyRevenue = invoices
       .filter(i => {
-        const invoiceDate = new Date(i.createdAt);
-        return i.status === 'paid' && 
-               invoiceDate.getMonth() + 1 === month && 
-               invoiceDate.getFullYear() === year;
+        const dateStr = i.date || i.createdAt;
+        if (!dateStr) return false;
+        const invoiceDate = parseDate(dateStr);
+        return !isNaN(invoiceDate.getTime()) && invoiceDate >= monthStart && invoiceDate <= monthEnd;
       })
       .reduce((sum, i) => sum + (Number(i.total) || 0), 0);
+    
+    // Advances: total approved this month + pending count
+    const monthlyAdvances = advances.filter(adv => {
+      const dateStr = adv.date;
+      if (!dateStr) return false;
+      const advDate = parseDate(dateStr);
+      return adv.status === 'approved' && !isNaN(advDate.getTime()) && advDate >= monthStart && advDate <= monthEnd;
+    });
+    const totalAdvances = monthlyAdvances.reduce((sum, adv) => sum + (Number(adv.amount) || 0), 0);
+    const pendingAdvances = advances.filter(a => a.status === 'pending').length;
     
     return {
       success: true,
       data: {
-        totalEmployees: employees.filter(e => e.status === 'active').length,
-        totalClients: clients.filter(c => c.status === 'active').length,
-        guardsToday,
-        vesselOrdersThisMonth,
-        pendingAdvances,
-        monthRevenue
+        activeEmployees,
+        activeClients,
+        presentGuards,
+        todayDayLabor,
+        monthlyVesselOrders,
+        monthlyRevenue,
+        totalAdvances,
+        pendingAdvances
       }
     };
   },

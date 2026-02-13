@@ -2,7 +2,7 @@
 
 A comprehensive Human Resource Management (HRM) web application designed for security service companies. Built with vanilla JavaScript, TailwindCSS, and Google Apps Script for backend data storage.
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.0--stable-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 ## 🌐 Live Demo
@@ -157,7 +157,7 @@ Edit `docs/js/config.js` to customize:
 ```javascript
 const CONFIG = {
   APP_NAME: "Al Aksha Security Management System",
-  APP_VERSION: "1.0.0",
+  APP_VERSION: "1.0.0-stable",
   API_URL: "YOUR_GOOGLE_SCRIPT_URL",  // Optional
   SESSION_DURATION: 8 * 60 * 60 * 1000,  // 8 hours
   CURRENCY: "৳",  // Bangladeshi Taka

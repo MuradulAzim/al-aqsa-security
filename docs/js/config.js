@@ -5,7 +5,7 @@
 
 const CONFIG = {
   APP_NAME: "Al Aksha Security Management System",
-  APP_VERSION: "1.0.0",
+  APP_VERSION: "1.0.0-stable",
   
   // Google Sheets API URL (will be filled after Apps Script deployment)
   API_URL: "https://script.google.com/macros/s/AKfycbyeO26S4ATkaLjWwSq7CD_ZCHfbKd23ZgQHxmTpBMGPeNEfDVhdvL3GZsbjBiMCyAYt/exec", // Leave empty for now - will use localStorage fallback

@@ -54,7 +54,7 @@ function setSystemInfo() {
   // Session expiry
   const session = getCurrentUser();
   if (session && session.loginTime) {
-    const loginTime = new Date(session.loginTime);
+    const loginTime = parseDate(session.loginTime);
     const expiryTime = new Date(loginTime.getTime() + CONFIG.SESSION_DURATION);
     document.getElementById('session-expires').textContent = formatDateTime(expiryTime);
   }

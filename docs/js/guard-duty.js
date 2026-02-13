@@ -176,7 +176,7 @@ function updateSummary() {
 
 function changeDate(days) {
   const dateInput = document.getElementById('duty-date');
-  const current = new Date(dateInput.value);
+  const current = parseDate(dateInput.value);
   current.setDate(current.getDate() + days);
   dateInput.value = formatDateISO(current);
   loadGuardDuty();
