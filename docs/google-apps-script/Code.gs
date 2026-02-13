@@ -245,7 +245,12 @@ function getAll(sheetName) {
   return rows.map(row => {
     const obj = {};
     headers.forEach((header, index) => {
-      obj[header] = row[index];
+      let value = row[index];
+      // Normalize Date objects to ISO string format (yyyy-MM-dd)
+      if (value instanceof Date) {
+        value = Utilities.formatDate(value, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+      }
+      obj[header] = value;
     });
     return obj;
   }).filter(row => row.id); // Filter out empty rows
