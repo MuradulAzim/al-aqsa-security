@@ -150,8 +150,10 @@ function renderDutyTable() {
       <tr>
         <td><div class="font-medium">${escapeHtml(record.employeeName || '-')}</div></td>
         <td>${escapeHtml(record.clientName || '-')}</td>
-        <td><span class="capitalize">${record.shift || '-'}</span></td>
+        <td>${formatDate(record.date) || '-'}</td>
         <td><span class="badge ${status.class}">${status.text}</span></td>
+        <td>${record.checkIn || '-'}</td>
+        <td>${record.checkOut || '-'}</td>
         <td class="text-sm text-gray-500">${escapeHtml(record.notes || '-')}</td>
         <td class="text-center">
           <button onclick="editRecord('${record.id}')" class="p-2 text-green-600 hover:bg-green-50 rounded-lg">✏️</button>
@@ -214,7 +216,8 @@ function editRecord(id) {
   document.getElementById('duty-client-id').value = record.clientId || '';
   document.getElementById('duty-client').value = record.clientName || '';
   
-  document.getElementById('duty-shift').value = record.shift || 'day';
+  document.getElementById('duty-checkin').value = record.checkIn || '';
+  document.getElementById('duty-checkout').value = record.checkOut || '';
   document.getElementById('duty-status').value = record.status || 'present';
   document.getElementById('duty-notes').value = record.notes || '';
   openModal('duty-modal');
@@ -244,9 +247,9 @@ async function handleSubmit(event) {
     employeeId: employeeId,
     employeeName: employeeName,
     clientId: clientId,
-    clientName: clientName,
-    shift: document.getElementById('duty-shift').value,
     status: document.getElementById('duty-status').value,
+    checkIn: document.getElementById('duty-checkin').value,
+    checkOut: document.getElementById('duty-checkout').value,
     notes: document.getElementById('duty-notes').value.trim()
   };
   
