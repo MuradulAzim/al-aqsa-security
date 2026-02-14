@@ -11,6 +11,14 @@ let employees = [];
 let clients = [];
 let editingId = null;
 
+// ============ DASHBOARD SYNC ============
+function notifyDashboard() {
+  // Safely refresh dashboard if it exists (user may not be on dashboard page)
+  if (typeof refreshDashboard === 'function') {
+    refreshDashboard();
+  }
+}
+
 // ============ INITIALIZATION ============
 async function initGuardDuty() {
   currentDate = getToday();
@@ -209,6 +217,7 @@ async function handleSubmit(event) {
       closeModal('duty-modal');
       editingId = null;
       await refreshGuardDuty(currentDate);
+      notifyDashboard();
     } else {
       showToast(result.message || 'Operation failed', 'error');
     }
@@ -231,6 +240,7 @@ async function deleteRecord(id) {
     if (result.success) {
       showToast('Record deleted', 'success');
       await refreshGuardDuty(currentDate);
+      notifyDashboard();
     } else {
       showToast(result.message || 'Delete failed', 'error');
     }
