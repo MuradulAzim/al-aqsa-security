@@ -121,15 +121,22 @@ async function loadGuardDuty() {
   try {
     showLoading();
     const result = await API.getGuardDuty(date);
+    hideLoading();
     if (result.success) {
       dutyRecords = result.data || [];
-      renderDutyTable();
-      updateSummary();
+    } else {
+      dutyRecords = [];
+      console.error('Failed to load guard duty:', result.message);
     }
-    hideLoading();
+    renderDutyTable();
+    updateSummary();
   } catch (error) {
     hideLoading();
+    dutyRecords = [];
+    renderDutyTable();
+    updateSummary();
     showToast('Error loading duty records', 'error');
+    console.error('loadGuardDuty error:', error);
   }
 }
 
@@ -253,8 +260,8 @@ async function handleSubmit(event) {
     notes: document.getElementById('duty-notes').value.trim()
   };
   
+  showLoading();
   try {
-    showLoading();
     let result;
     if (editingId) {
       data.id = editingId;
@@ -262,34 +269,39 @@ async function handleSubmit(event) {
     } else {
       result = await API.addGuardDuty(data);
     }
+    hideLoading();
     
     if (result.success) {
       showToast(editingId ? 'Record updated' : 'Record added', 'success');
       closeModal('duty-modal');
+      editingId = null;
       await loadGuardDuty();
     } else {
       showToast(result.message || 'Operation failed', 'error');
     }
-    hideLoading();
   } catch (error) {
     hideLoading();
     showToast('Error saving record', 'error');
+    console.error('handleSubmit error:', error);
   }
 }
 
 async function deleteRecord(id) {
   if (!confirmDelete('Are you sure you want to delete this record?')) return;
   
+  showLoading();
   try {
-    showLoading();
     const result = await API.deleteGuardDuty(id);
+    hideLoading();
     if (result.success) {
       showToast('Record deleted', 'success');
       await loadGuardDuty();
+    } else {
+      showToast(result.message || 'Delete failed', 'error');
     }
-    hideLoading();
   } catch (error) {
     hideLoading();
     showToast('Error deleting record', 'error');
+    console.error('deleteRecord error:', error);
   }
 }
