@@ -8,15 +8,30 @@
   <link rel="stylesheet" href="css/style.css">
   <script>
     tailwind.config = {
-      theme: { extend: { colors: { primary: '#1e3a5f', 'primary-dark': '#152a45', 'primary-light': '#2d4a6f' } } }
+      theme: {
+        extend: {
+          colors: {
+            primary: '#1e3a5f',
+            'primary-dark': '#152a45',
+            'primary-light': '#2d4a6f'
+          }
+        }
+      }
     }
   </script>
 </head>
 <body class="bg-gray-100 min-h-screen">
+
+  <!-- Navbar -->
   <div id="navbar"></div>
+
   <div class="flex">
+    <!-- Sidebar -->
     <div id="sidebar"></div>
+
+    <!-- Main Content -->
     <main class="flex-1 p-4 md:p-6 md:ml-64 mt-16">
+      <!-- Page Header -->
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
           <h1 class="text-2xl font-bold text-gray-800">Guard Duty</h1>
@@ -26,27 +41,27 @@
           <span>+</span><span>Add Duty Record</span>
         </button>
       </div>
-      
-      <!-- Date Selector -->
+
+      <!-- Date Navigation -->
       <div class="bg-white rounded-lg shadow p-4 mb-6">
         <div class="flex flex-col sm:flex-row gap-4 items-center">
           <div class="flex items-center gap-2">
             <label class="font-medium text-gray-700">Date:</label>
-            <input type="date" id="duty-date" class="px-4 py-2 border rounded-lg" onchange="loadGuardDuty()">
+            <input type="date" id="duty-date" class="px-4 py-2 border rounded-lg" onchange="onDateChange()">
           </div>
           <div class="flex gap-2">
-            <button onclick="changeDate(-1)" class="px-3 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">← Previous</button>
-            <button onclick="setToday()" class="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200">Today</button>
-            <button onclick="changeDate(1)" class="px-3 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">Next →</button>
+            <button onclick="navigateDate(-1)" class="px-3 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">← Previous</button>
+            <button onclick="navigateToday()" class="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200">Today</button>
+            <button onclick="navigateDate(1)" class="px-3 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">Next →</button>
           </div>
         </div>
       </div>
-      
+
       <!-- Summary Cards -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div class="grid grid-cols-3 gap-4 mb-6">
         <div class="bg-white rounded-lg shadow p-4 text-center">
-          <p class="text-3xl font-bold text-blue-600" id="total-assigned">0</p>
-          <p class="text-sm text-gray-500">Total Assigned</p>
+          <p class="text-3xl font-bold text-blue-600" id="total-records">0</p>
+          <p class="text-sm text-gray-500">Total Records</p>
         </div>
         <div class="bg-white rounded-lg shadow p-4 text-center">
           <p class="text-3xl font-bold text-green-600" id="total-present">0</p>
@@ -56,19 +71,15 @@
           <p class="text-3xl font-bold text-red-600" id="total-absent">0</p>
           <p class="text-sm text-gray-500">Absent</p>
         </div>
-        <div class="bg-white rounded-lg shadow p-4 text-center">
-          <p class="text-3xl font-bold text-purple-600" id="total-clients">0</p>
-          <p class="text-sm text-gray-500">Clients Covered</p>
-        </div>
       </div>
-      
+
       <!-- Guard Duty Table -->
       <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="overflow-x-auto">
           <table class="data-table">
             <thead>
               <tr>
-                <th>Guard</th>
+                <th>Employee</th>
                 <th>Client</th>
                 <th>Date</th>
                 <th>Status</th>
@@ -102,17 +113,21 @@
         <form id="duty-form" onsubmit="handleSubmit(event)">
           <div class="p-4 space-y-4">
             <input type="hidden" id="duty-id">
+
+            <!-- Employee Selection -->
             <div class="relative">
               <label class="block text-sm font-medium text-gray-700 mb-1">Employee *</label>
               <input type="hidden" id="duty-employee-id">
-              <input type="text" id="duty-employee" required autocomplete="off" 
-                class="w-full px-3 py-2 border rounded-lg" 
+              <input type="text" id="duty-employee" required autocomplete="off"
+                class="w-full px-3 py-2 border rounded-lg"
                 placeholder="Type to search employee..."
                 oninput="filterEmployees(this.value)"
-                onfocus="showEmployeeDropdown()"
+                onfocus="showDropdown('employee-dropdown')"
                 onblur="setTimeout(() => hideDropdown('employee-dropdown'), 200)">
               <div id="employee-dropdown" class="hidden absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-48 overflow-y-auto"></div>
             </div>
+
+            <!-- Client Selection -->
             <div class="relative">
               <label class="block text-sm font-medium text-gray-700 mb-1">Client *</label>
               <input type="hidden" id="duty-client-id">
@@ -120,10 +135,12 @@
                 class="w-full px-3 py-2 border rounded-lg"
                 placeholder="Type to search client..."
                 oninput="filterClients(this.value)"
-                onfocus="showClientDropdown()"
+                onfocus="showDropdown('client-dropdown')"
                 onblur="setTimeout(() => hideDropdown('client-dropdown'), 200)">
               <div id="client-dropdown" class="hidden absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-48 overflow-y-auto"></div>
             </div>
+
+            <!-- Check-In / Check-Out -->
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Check-In</label>
@@ -134,6 +151,8 @@
                 <input type="time" id="duty-checkout" class="w-full px-3 py-2 border rounded-lg">
               </div>
             </div>
+
+            <!-- Status -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Status *</label>
               <select id="duty-status" required class="w-full px-3 py-2 border rounded-lg">
@@ -142,6 +161,8 @@
                 <option value="late">Late</option>
               </select>
             </div>
+
+            <!-- Notes -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
               <textarea id="duty-notes" rows="2" class="w-full px-3 py-2 border rounded-lg" placeholder="Optional notes"></textarea>
